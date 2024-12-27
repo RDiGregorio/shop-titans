@@ -15,28 +15,37 @@ function getEnd(data) {
 }
 
 function getData(data) {
-    return [getStart(data), getEnd(data)];
+    const start = getStart(data), end = getEnd(data), delta = end - start;
+    return [start.toFixed(2), end.toFixed(2), delta.toFixed(2)];
 }
 
 async function run() {
-    const arrays = [[new Date()], [
+    const arrays = [["Legacy Guild"], [new Date()], [
         "name",
         "level start",
         "level end",
+        "level delta",
         "fortune start",
         "fortune end",
+        "fortune delta",
         "invest start",
         "invest end",
-        "primes start",
-        "primes end",
+        "invest delta",
+        "bounties start",
+        "bounties end",
+        "bounties delta",
         "collection start",
         "collection end",
+        "collection delta",
         "help start",
         "help end",
+        "help delta",
         "prestige start",
         "prestige end",
+        "prestige delta",
         "master start",
-        "master end"
+        "master end",
+        "master delta"
     ]];
 
     const browser = await puppeteer.launch({headless: false}), page = await browser.newPage();
