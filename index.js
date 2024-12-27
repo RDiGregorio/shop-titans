@@ -19,8 +19,15 @@ function getData(data) {
     return [start.toFixed(2), end.toFixed(2), delta.toFixed(2)];
 }
 
+function getMax(deltas, key, label) {
+    const array = deltas.filter(object => object.key === key);
+    array.sort((object, other) => Number.parseFloat(object.delta) - Number.parseFloat(other.delta));
+    const max = array[array.length - 1];
+    return [label, max.name, max.delta];
+}
+
 async function run() {
-    const arrays = [["Legacy Guild"], [new Date().toISOString().slice(0, 10)], [
+    const arrays = [["Legacy Guild", new Date().toISOString().slice(0, 10)], [], [
         "Name",
         "Level Start",
         "Level End",
@@ -52,19 +59,21 @@ async function run() {
     await page.goto("https://union-titans.fr/en/guilds/5d1e51bb3a550a105911f49c");
     await page.waitForSelector("#members-list a");
 
-    const hrefs = await page.evaluate(() =>
-        [...document.querySelectorAll("#members-list a")].map(element => element.href)
-    );
+    const
+        hrefs = await page.evaluate(() =>
+            [...document.querySelectorAll("#members-list a")].map(element => element.href)
+        ),
+        deltas = [];
 
     for (const href of hrefs) {
         await page.goto(href);
         await page.waitForSelector("#fortune-chart-canvas");
 
         const
-            name = await page.evaluate(() =>
+            name = (await page.evaluate(() =>
                 document.querySelector("h3.widget-user-username").textContent.trim()
-            ),
-            array = [name.split("#")[0].replace(/[,\n]+/g, "")],
+            )).split("#")[0].replace(/[,\n]+/g, ""),
+            array = [name],
             charts = JSON.parse(await page.evaluate(() => JSON.stringify({
                 level: levelChart.data.datasets[0].data,
                 fortune: fortuneChart.data.datasets[0].data.reverse(),
@@ -76,9 +85,26 @@ async function run() {
                 master: masterChart.data.datasets[0].data.reverse()
             })));
 
-        for (const [key, value] of Object.entries(charts)) array.push(...getData(value));
+        for (const [key, value] of Object.entries(charts)) {
+            const [start, end, delta] = getData(value);
+            array.push(start, end, delta);
+            deltas.push({name, key, delta});
+        }
+
         arrays.push(array);
     }
+
+    arrays.push(
+        [],
+        getMax(deltas, "level", "Max Level Delta"),
+        getMax(deltas, "fortune", "Max Fortune Delta"),
+        getMax(deltas, "invest", "Max Investments Delta"),
+        getMax(deltas, "primes", "Max Bounties Delta"),
+        getMax(deltas, "collection", "Max Collection Delta"),
+        getMax(deltas, "help", "Max Guild Helpers Delta"),
+        getMax(deltas, "prestige", "Max Prestige Delta"),
+        getMax(deltas, "master", "Max Mastered Plans Delta")
+    );
 
     const
         string = arrays.map(array => array.join(",")).join("\n"),
