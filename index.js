@@ -20,32 +20,32 @@ function getData(data) {
 }
 
 async function run() {
-    const arrays = [["Legacy Guild"], [new Date()], [
-        "name",
-        "level start",
-        "level end",
-        "level delta",
-        "fortune start",
-        "fortune end",
-        "fortune delta",
-        "invest start",
-        "invest end",
-        "invest delta",
-        "bounties start",
-        "bounties end",
-        "bounties delta",
-        "collection start",
-        "collection end",
-        "collection delta",
-        "help start",
-        "help end",
-        "help delta",
-        "prestige start",
-        "prestige end",
-        "prestige delta",
-        "master start",
-        "master end",
-        "master delta"
+    const arrays = [["Legacy Guild"], [new Date().toISOString().slice(0, 10)], [
+        "Name",
+        "Level Start",
+        "Level End",
+        "Level Delta",
+        "Fortune Start",
+        "Fortune End",
+        "Fortune Delta",
+        "Investments Start",
+        "Investments End",
+        "Investments Delta",
+        "Bounties Start",
+        "Bounties End",
+        "Bounties Delta",
+        "Collection Start",
+        "Collection End",
+        "Collection Delta",
+        "Guild Helpers Start",
+        "Guild Helpers End",
+        "Guild Helpers Delta",
+        "Prestige Start",
+        "Prestige End",
+        "Prestige Delta",
+        "Mastered Plans Start",
+        "Mastered Plans End",
+        "Mastered Plans Delta"
     ]];
 
     const browser = await puppeteer.launch({headless: false}), page = await browser.newPage();
@@ -64,7 +64,7 @@ async function run() {
             name = await page.evaluate(() =>
                 document.querySelector("h3.widget-user-username").textContent.trim()
             ),
-            array = [name.replace(/[,\n]+/g, "")],
+            array = [name.split("#")[0].replace(/[,\n]+/g, "")],
             charts = JSON.parse(await page.evaluate(() => JSON.stringify({
                 level: levelChart.data.datasets[0].data,
                 fortune: fortuneChart.data.datasets[0].data.reverse(),
